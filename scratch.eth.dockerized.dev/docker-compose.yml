@@ -1,0 +1,114 @@
+version: "3"
+
+x-node: &node-common
+  depends_on:
+    - bootnode
+  networks:
+    - scratch
+
+services:
+  bootnode:
+    build:
+      context: .
+      dockerfile: ./node.Dockerfile
+    container_name: bootnode
+    command: |
+      --nodekeyhex="011cfce7fec2c2451627c39ebab77f0157fa4c55be46618b3c860efa467bd7c4"
+      --nodiscover
+      --ipcdisable
+      --networkid=$NETWORK_ID
+      --netrestrict="172.16.254.0/24"
+    networks:
+      - scratch
+
+  signer1:
+    <<: *node-common
+    build:
+      context: .
+      dockerfile: ./signer.Dockerfile
+      args:
+        privatekey: ca45feba88b7f1e3e795ca97e369c35f6d9f01ab850075000f26f775abeb5555
+        password: "tr#sted"
+    container_name: signer1
+    command: |
+      --bootnodes="enode://65dd59b0191271e9fd67f2ead01660690498e304d8b3c862df80e9edb3b14fb36784347fb3522f24653a7d34f8888bb9c2509d10f5b27acb7fd5d88d87b19fad@bootnode:30303"
+      --syncmode "full"
+      --password /.pass
+      --unlock 0x7455d41317D6a11fC4fb7E480F7c0A77a461dEaC
+      --mine
+      --miner.etherbase 0x7455d41317D6a11fC4fb7E480F7c0A77a461dEaC
+      --networkid=$NETWORK_ID
+      --netrestrict="172.16.254.0/24"
+      --ipcdisable
+    volumes:
+      - signer1:/root/.ethereum
+
+  signer2:
+    <<: *node-common
+    build:
+      context: .
+      dockerfile: ./signer.Dockerfile
+      args:
+        privatekey: d2ff6c238f51d4d2c2ad2999c1ab40d19cbe14e2d08ddcaa7ef94339631b4f47
+        password: "p10159219@Gopher"
+    container_name: signer2
+    command: |
+      --bootnodes="enode://65dd59b0191271e9fd67f2ead01660690498e304d8b3c862df80e9edb3b14fb36784347fb3522f24653a7d34f8888bb9c2509d10f5b27acb7fd5d88d87b19fad@bootnode:30303"
+      --syncmode "full"
+      --password /.pass
+      --unlock 0xEdED9f8278117682049FBD69d415995881B10945
+      --mine
+      --miner.etherbase 0xEdED9f8278117682049FBD69d415995881B10945
+      --networkid=$NETWORK_ID
+      --netrestrict="172.16.254.0/24"
+      --ipcdisable
+    volumes:
+      - signer2:/root/.ethereum
+
+  node1:
+    <<: *node-common
+    build:
+      context: .
+      dockerfile: ./node.Dockerfile
+    container_name: node1-rpc
+    command: |
+      --bootnodes="enode://65dd59b0191271e9fd67f2ead01660690498e304d8b3c862df80e9edb3b14fb36784347fb3522f24653a7d34f8888bb9c2509d10f5b27acb7fd5d88d87b19fad@bootnode:30303"
+      --syncmode "full"
+      --networkid=$NETWORK_ID
+      --netrestrict="172.16.254.0/24"
+      --allow-insecure-unlock
+      --http
+      --http.addr="0.0.0.0"
+      --http.api="eth,web3,net,admin,personal"
+      --http.corsdomain="*"
+    ports:
+      - 8545:8545
+    volumes:
+      - node1:/root/.ethereum
+
+  node2:
+    <<: *node-common
+    build:
+      context: .
+      dockerfile: ./node.Dockerfile
+    container_name: node2
+    command: |
+      --bootnodes="enode://65dd59b0191271e9fd67f2ead01660690498e304d8b3c862df80e9edb3b14fb36784347fb3522f24653a7d34f8888bb9c2509d10f5b27acb7fd5d88d87b19fad@bootnode:30303"
+      --syncmode "full"
+      --networkid=$NETWORK_ID
+      --netrestrict="172.16.254.0/24"
+    volumes:
+      - node2:/root/.ethereum
+
+volumes:
+  signer1:
+  signer2:
+  node1:
+  node2:
+
+networks:
+  scratch:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.254.0/24

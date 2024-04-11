@@ -8,7 +8,6 @@ Proof of Stake (PoS): In PoS, validators are chosen to create new blocks and val
 
 Each consensus mechanism has its own advantages and disadvantages, and they are designed to address different concerns such as security, scalability, and energy consumption within the Ethereum network.
 
-
 Enumerate the advantages and disadavantages of each of the above
 
 Proof of Work (PoW): Ethash
@@ -62,8 +61,6 @@ geth \
 --miner.etherbase 0x7455d41317D6a11fC4fb7E480F7c0A77a461dEaC \
 console
 
-
-
 geth \
 --datadir node2 \
 --port 30307 \
@@ -73,5 +70,26 @@ geth \
 --authrpc.port 8552 \
 console
 
-
 block 964: 0x627640abe081374a6f1afdf7a77ffbb8c4d3b48577e7afddef74b070ac97c142
+
+Docker Commands:
+
+docker run -it --rm scrathethdockerized-node2
+docker run -it --rm scrathethdockerized-node1
+docker exec -it 5ba0a243624b sh
+
+Brave Wallet
+Pass: p10159219@Gopher2023
+
+0.5ether -> 2884
+
+[x] setup local POA Private Net
+[x] setup a dockerized version
+[x] familiarize with the eth, web3.js apis
+[x] learn how to add up sealer nodes (internally) and voting. externall will be via exposing bootnode of the internet
+[] prepare a production grade setup
+[] deploy a testnet for staging
+[] deploy a private net for production
+[] relearn smart contracts with solidity: (Currently here)
+[] rewrite avatha either with web3 or natively in langauge with json_rpc
+[] setup other auxiliary tools like etherscan for private net
