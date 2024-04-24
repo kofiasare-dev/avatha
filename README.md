@@ -1,5 +1,3 @@
-Sure! Here's a summary of Proof of Work (PoW), Proof of Authority (PoA), and Proof of Stake (PoS) in the context of Ethereum:
-
 Proof of Work (PoW): In PoW, miners compete to solve complex puzzles to validate transactions on the Ethereum network. The first miner to solve the puzzle gets to add the transactions and is rewarded with Ethereum. This process ensures security by making it difficult for anyone to cheat or fake transactions. However, it requires a lot of computational power and energy.
 
 Proof of Authority (PoA): In PoA, trusted validators are chosen to add transactions to the Ethereum network. These validators are known and trusted members of the community who have the authority to validate transactions. Unlike PoW, there's no puzzle-solving involved, making transactions faster and more efficient. However, it relies on trusting the selected validators.
@@ -48,48 +46,3 @@ Disadvantages:
 Wealth Concentration: PoS rewards validators based on the amount of cryptocurrency they hold, potentially leading to wealth concentration among a few large stakeholders.
 Nothing-at-Stake Problem: PoS introduces the risk of the "nothing-at-stake" problem, where validators have no cost associated with validating multiple competing chains, potentially leading to network instability.
 Long-Term Security Concerns: Some critics argue that PoS may not provide the same level of long-term security as PoW, especially in scenarios where a majority of validators become malicious or compromised.
-
-geth \
---datadir node1 \
---syncmode 'full' \
---port 30306 \
---networkid 10153857 \
---unlock 0x7455d41317D6a11fC4fb7E480F7c0A77a461dEaC \
---password node1/pass.txt \
---authrpc.port 8551 \
---mine \
---miner.etherbase 0x7455d41317D6a11fC4fb7E480F7c0A77a461dEaC \
-console
-
-geth \
---datadir node2 \
---port 30307 \
---networkid 10153857 \
---unlock 0xd220F00e689a5304ccE225f026296031f247A60F \
---password node2/pass.txt \
---authrpc.port 8552 \
-console
-
-block 964: 0x627640abe081374a6f1afdf7a77ffbb8c4d3b48577e7afddef74b070ac97c142
-
-Docker Commands:
-
-docker run -it --rm scrathethdockerized-node2
-docker run -it --rm scrathethdockerized-node1
-docker exec -it 5ba0a243624b sh
-
-Brave Wallet
-Pass: p10159219@Gopher2023
-
-0.5ether -> 2884
-
-[x] setup local POA Private Net
-[x] setup a dockerized version
-[x] familiarize with the eth, web3.js apis
-[x] learn how to add up sealer nodes (internally) and voting. externall will be via exposing bootnode of the internet
-[] prepare a production grade setup
-[] deploy a testnet for staging
-[] deploy a private net for production
-[] relearn smart contracts with solidity: (Currently here)
-[] rewrite avatha either with web3 or natively in langauge with json_rpc
-[] setup other auxiliary tools like etherscan for private net

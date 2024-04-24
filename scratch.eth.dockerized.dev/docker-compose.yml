@@ -14,10 +14,9 @@ services:
     container_name: bootnode
     command: |
       --nodekeyhex="011cfce7fec2c2451627c39ebab77f0157fa4c55be46618b3c860efa467bd7c4"
-      --nodiscover
-      --ipcdisable
       --networkid=$NETWORK_ID
       --netrestrict="172.16.254.0/24"
+      --ipcdisable
     networks:
       - scratch
 
@@ -27,16 +26,16 @@ services:
       context: .
       dockerfile: ./signer.Dockerfile
       args:
-        privatekey: ca45feba88b7f1e3e795ca97e369c35f6d9f01ab850075000f26f775abeb5555
-        password: "tr#sted"
+        privatekey: 232a80e75637028e4080c8f4bf3ade2fcca2dc28c8f0a3f33d244bf8620919c4
+        password: "tr#sted24"
     container_name: signer1
     command: |
       --bootnodes="enode://65dd59b0191271e9fd67f2ead01660690498e304d8b3c862df80e9edb3b14fb36784347fb3522f24653a7d34f8888bb9c2509d10f5b27acb7fd5d88d87b19fad@bootnode:30303"
       --syncmode "full"
       --password /.pass
-      --unlock 0x7455d41317D6a11fC4fb7E480F7c0A77a461dEaC
+      --unlock 0x42B74898F1E5D638CC3cdDcf908f631752a783Dc
       --mine
-      --miner.etherbase 0x7455d41317D6a11fC4fb7E480F7c0A77a461dEaC
+      --miner.etherbase 0x42B74898F1E5D638CC3cdDcf908f631752a783Dc
       --networkid=$NETWORK_ID
       --netrestrict="172.16.254.0/24"
       --ipcdisable
@@ -49,16 +48,16 @@ services:
       context: .
       dockerfile: ./signer.Dockerfile
       args:
-        privatekey: d2ff6c238f51d4d2c2ad2999c1ab40d19cbe14e2d08ddcaa7ef94339631b4f47
-        password: "p10159219@Gopher"
+        privatekey: b1d3b7945a79deb28efe7c30d887f40510feaea261193f9a75ab5325b4fa614f
+        password: "tr#sted24"
     container_name: signer2
     command: |
       --bootnodes="enode://65dd59b0191271e9fd67f2ead01660690498e304d8b3c862df80e9edb3b14fb36784347fb3522f24653a7d34f8888bb9c2509d10f5b27acb7fd5d88d87b19fad@bootnode:30303"
       --syncmode "full"
       --password /.pass
-      --unlock 0xEdED9f8278117682049FBD69d415995881B10945
+      --unlock 0xB0c157df5E1C3CC66A0AF7b5C45Eb0b9480B64Fd
       --mine
-      --miner.etherbase 0xEdED9f8278117682049FBD69d415995881B10945
+      --miner.etherbase 0xB0c157df5E1C3CC66A0AF7b5C45Eb0b9480B64Fd
       --networkid=$NETWORK_ID
       --netrestrict="172.16.254.0/24"
       --ipcdisable
@@ -70,19 +69,13 @@ services:
     build:
       context: .
       dockerfile: ./node.Dockerfile
-    container_name: node1-rpc
+    container_name: node1-sync
     command: |
       --bootnodes="enode://65dd59b0191271e9fd67f2ead01660690498e304d8b3c862df80e9edb3b14fb36784347fb3522f24653a7d34f8888bb9c2509d10f5b27acb7fd5d88d87b19fad@bootnode:30303"
       --syncmode "full"
       --networkid=$NETWORK_ID
       --netrestrict="172.16.254.0/24"
-      --allow-insecure-unlock
-      --http
-      --http.addr="0.0.0.0"
-      --http.api="eth,web3,net,admin,personal"
-      --http.corsdomain="*"
-    ports:
-      - 8545:8545
+      --ipcdisable
     volumes:
       - node1:/root/.ethereum
 
@@ -91,12 +84,19 @@ services:
     build:
       context: .
       dockerfile: ./node.Dockerfile
-    container_name: node2
+    container_name: node2-rpc
     command: |
       --bootnodes="enode://65dd59b0191271e9fd67f2ead01660690498e304d8b3c862df80e9edb3b14fb36784347fb3522f24653a7d34f8888bb9c2509d10f5b27acb7fd5d88d87b19fad@bootnode:30303"
       --syncmode "full"
       --networkid=$NETWORK_ID
       --netrestrict="172.16.254.0/24"
+      --allow-insecure-unlock
+      --http
+      --http.addr="0.0.0.0"
+      --http.api="db,eth,net,web3,personal,web3"
+      --http.corsdomain="*"
+    ports:
+      - 8545:8545
     volumes:
       - node2:/root/.ethereum
 

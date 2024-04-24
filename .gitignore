@@ -2,3 +2,9 @@ geth
 history
 data
 node_modules
+cache
+artifacts
+deployments
+
+scratch.eth.dockerized.dev/.env
+notes.txt
