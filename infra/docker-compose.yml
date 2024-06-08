@@ -93,7 +93,7 @@ services:
       --allow-insecure-unlock
       --http
       --http.addr="0.0.0.0"
-      --http.api="db,eth,net,web3,personal,web3"
+      --http.api="admin,eth,net,txpool,debug,personal,web3"
       --http.corsdomain="*"
     ports:
       - 8545:8545
