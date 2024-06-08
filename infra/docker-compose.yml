@@ -1,24 +1,22 @@
-version: "3"
-
 x-node: &node-common
   depends_on:
     - bootnode
   networks:
-    - scratch
+    - node-net
 
 services:
   bootnode:
+    container_name: bootnode
     build:
       context: .
       dockerfile: ./node.Dockerfile
-    container_name: bootnode
     command: |
-      --nodekeyhex="011cfce7fec2c2451627c39ebab77f0157fa4c55be46618b3c860efa467bd7c4"
-      --networkid=$NETWORK_ID
+      --nodekeyhex=$BOOTNODEKEY
+      --networkid=$NETWORKID
       --netrestrict="172.16.254.0/24"
       --ipcdisable
     networks:
-      - scratch
+      - node-net
 
   signer1:
     <<: *node-common
@@ -26,17 +24,17 @@ services:
       context: .
       dockerfile: ./signer.Dockerfile
       args:
-        privatekey: 232a80e75637028e4080c8f4bf3ade2fcca2dc28c8f0a3f33d244bf8620919c4
-        password: "tr#sted24"
+        privatekey: $SIGNER1_KEY
+        password: $PASSWORD
     container_name: signer1
     command: |
-      --bootnodes="enode://65dd59b0191271e9fd67f2ead01660690498e304d8b3c862df80e9edb3b14fb36784347fb3522f24653a7d34f8888bb9c2509d10f5b27acb7fd5d88d87b19fad@bootnode:30303"
-      --syncmode "full"
-      --password /.pass
-      --unlock 0x42B74898F1E5D638CC3cdDcf908f631752a783Dc
+      --bootnodes=$BOOTNODES
+      --syncmode="full"
+      --password=/.pass
+      --unlock=$SIGNER1
       --mine
-      --miner.etherbase 0x42B74898F1E5D638CC3cdDcf908f631752a783Dc
-      --networkid=$NETWORK_ID
+      --miner.etherbase=$SIGNER1
+      --networkid=$NETWORKID
       --netrestrict="172.16.254.0/24"
       --ipcdisable
     volumes:
@@ -48,17 +46,17 @@ services:
       context: .
       dockerfile: ./signer.Dockerfile
       args:
-        privatekey: b1d3b7945a79deb28efe7c30d887f40510feaea261193f9a75ab5325b4fa614f
-        password: "tr#sted24"
+        privatekey: $SIGNER2_KEY
+        password: $PASSWORD
     container_name: signer2
     command: |
-      --bootnodes="enode://65dd59b0191271e9fd67f2ead01660690498e304d8b3c862df80e9edb3b14fb36784347fb3522f24653a7d34f8888bb9c2509d10f5b27acb7fd5d88d87b19fad@bootnode:30303"
-      --syncmode "full"
-      --password /.pass
-      --unlock 0xB0c157df5E1C3CC66A0AF7b5C45Eb0b9480B64Fd
+      --bootnodes=$BOOTNODES
+      --syncmode="full"
+      --password=/.pass
+      --unlock=$SIGNER2
       --mine
-      --miner.etherbase 0xB0c157df5E1C3CC66A0AF7b5C45Eb0b9480B64Fd
-      --networkid=$NETWORK_ID
+      --miner.etherbase=$SIGNER2
+      --networkid=$NETWORKID
       --netrestrict="172.16.254.0/24"
       --ipcdisable
     volumes:
@@ -71,9 +69,9 @@ services:
       dockerfile: ./node.Dockerfile
     container_name: node1-sync
     command: |
-      --bootnodes="enode://65dd59b0191271e9fd67f2ead01660690498e304d8b3c862df80e9edb3b14fb36784347fb3522f24653a7d34f8888bb9c2509d10f5b27acb7fd5d88d87b19fad@bootnode:30303"
-      --syncmode "full"
-      --networkid=$NETWORK_ID
+      --bootnodes=$BOOTNODES
+      --syncmode="full"
+      --networkid=$NETWORKID
       --netrestrict="172.16.254.0/24"
       --ipcdisable
     volumes:
@@ -86,28 +84,67 @@ services:
       dockerfile: ./node.Dockerfile
     container_name: node2-rpc
     command: |
-      --bootnodes="enode://65dd59b0191271e9fd67f2ead01660690498e304d8b3c862df80e9edb3b14fb36784347fb3522f24653a7d34f8888bb9c2509d10f5b27acb7fd5d88d87b19fad@bootnode:30303"
-      --syncmode "full"
-      --networkid=$NETWORK_ID
+      --bootnodes=$BOOTNODES
+      --syncmode="full"
+      --networkid=$NETWORKID
       --netrestrict="172.16.254.0/24"
       --allow-insecure-unlock
       --http
       --http.addr="0.0.0.0"
-      --http.api="db,eth,net,web3,personal,web3"
+      --http.api="admin,eth,net,txpool,debug,personal,web3"
       --http.corsdomain="*"
+      --http.vhosts=*
     ports:
       - 8545:8545
     volumes:
       - node2:/root/.ethereum
 
+  explorer-db:
+    image: postgres:15.1-alpine
+    container_name: explorer-db
+    environment:
+      - POSTGRES_PASSWORD=$EXPLORER_DB_PASSWORD
+    volumes:
+      - explorer_data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+  explorer:
+    build:
+      context: explorer
+      args:
+        CACHE_EXCHANGE_RATES_PERIOD: ""
+        API_V1_READ_METHODS_DISABLED: "false"
+        DISABLE_WEBAPP: "false"
+        API_V1_WRITE_METHODS_DISABLED: "false"
+        CACHE_TOTAL_GAS_USAGE_COUNTER_ENABLED: ""
+        CACHE_ADDRESS_WITH_BALANCES_UPDATE_INTERVAL: ""
+        ADMIN_PANEL_ENABLED: "true"
+        RELEASE_VERSION: 6.6.0
+    container_name: explorer
+    command: |
+      sh -c "bin/blockscout eval \"Elixir.Explorer.ReleaseTasks.create_and_migrate()\" &&
+      bin/blockscout start"
+    env_file:
+      - ./explorer/.env
+    ports:
+      - 4000:4000
+    depends_on:
+      - explorer-db
+      - node2
+    networks:
+      - default
+      - node-net
+
 volumes:
+  explorer_data:
   signer1:
   signer2:
   node1:
   node2:
 
 networks:
-  scratch:
+  node-net:
     driver: bridge
     ipam:
       config:
