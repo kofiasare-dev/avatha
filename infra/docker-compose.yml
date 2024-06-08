@@ -131,7 +131,7 @@ services:
       - 4000:4000
     depends_on:
       - explorer-db
-      # - node2
+      - node2
     networks:
       - default
       - node-net
