@@ -1,10 +1,8 @@
-version: "3"
-
 x-node: &node-common
   depends_on:
     - bootnode
   networks:
-    - scratch
+    - node-net
 
 services:
   bootnode:
@@ -18,7 +16,7 @@ services:
       --netrestrict="172.16.254.0/24"
       --ipcdisable
     networks:
-      - scratch
+      - node-net
 
   signer1:
     <<: *node-common
@@ -95,19 +93,58 @@ services:
       --http.addr="0.0.0.0"
       --http.api="admin,eth,net,txpool,debug,personal,web3"
       --http.corsdomain="*"
+      --http.vhosts=*
     ports:
       - 8545:8545
     volumes:
       - node2:/root/.ethereum
 
+  explorer-db:
+    image: postgres:15.1-alpine
+    container_name: explorer-db
+    environment:
+      - POSTGRES_PASSWORD=$EXPLORER_DB_PASSWORD
+    volumes:
+      - explorer_data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+  explorer:
+    build:
+      context: explorer
+      args:
+        CACHE_EXCHANGE_RATES_PERIOD: ""
+        API_V1_READ_METHODS_DISABLED: "false"
+        DISABLE_WEBAPP: "false"
+        API_V1_WRITE_METHODS_DISABLED: "false"
+        CACHE_TOTAL_GAS_USAGE_COUNTER_ENABLED: ""
+        CACHE_ADDRESS_WITH_BALANCES_UPDATE_INTERVAL: ""
+        ADMIN_PANEL_ENABLED: "true"
+        RELEASE_VERSION: 6.6.0
+    container_name: explorer
+    command: |
+      sh -c "bin/blockscout eval \"Elixir.Explorer.ReleaseTasks.create_and_migrate()\" &&
+      bin/blockscout start"
+    env_file:
+      - ./explorer/.env
+    ports:
+      - 4000:4000
+    depends_on:
+      - explorer-db
+      # - node2
+    networks:
+      - default
+      - node-net
+
 volumes:
+  explorer_data:
   signer1:
   signer2:
   node1:
   node2:
 
 networks:
-  scratch:
+  node-net:
     driver: bridge
     ipam:
       config:

@@ -6,5 +6,5 @@ cache
 artifacts
 deployments
 
-infra/.env
+.env
 notes.txt
