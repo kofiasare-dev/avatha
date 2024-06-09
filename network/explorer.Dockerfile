@@ -28,7 +28,7 @@ ARG MUD_INDEXER_ENABLED
 ENV MUD_INDEXER_ENABLED=${MUD_INDEXER_ENABLED}
 
 # Cache elixir deps
-RUN git clone https://github.com/blockscout/blockscout.git /app
+RUN git clone --depth 1 --branch=master --single-branch https://github.com/blockscout/blockscout.git /app
 RUN mix local.hex --force
 RUN mix do deps.get, local.rebar --force, deps.compile
 

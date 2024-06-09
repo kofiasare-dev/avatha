@@ -6,10 +6,10 @@ x-node: &node-common
 
 services:
   bootnode:
-    container_name: bootnode
     build:
       context: .
       dockerfile: ./node.Dockerfile
+    container_name: bootnode
     command: |
       --nodekeyhex=$BOOTNODEKEY
       --networkid=$NETWORKID
@@ -110,8 +110,12 @@ services:
       - 5432:5432
 
   explorer:
+    depends_on:
+      - explorer-db
+      - node2
     build:
-      context: explorer
+      context: .
+      dockerfile: ./explorer.Dockerfile
       args:
         CACHE_EXCHANGE_RATES_PERIOD: ""
         API_V1_READ_METHODS_DISABLED: "false"
@@ -123,18 +127,16 @@ services:
         RELEASE_VERSION: 6.6.0
     container_name: explorer
     command: |
-      sh -c "bin/blockscout eval \"Elixir.Explorer.ReleaseTasks.create_and_migrate()\" &&
+      sh -c "\
+      bin/blockscout eval \"Elixir.Explorer.ReleaseTasks.create_and_migrate()\" &&
       bin/blockscout start"
-    env_file:
-      - ./explorer/.env
     ports:
       - 4000:4000
-    depends_on:
-      - explorer-db
-      - node2
     networks:
       - default
       - node-net
+    env_file:
+      - .env.explorer
 
 volumes:
   explorer_data:
