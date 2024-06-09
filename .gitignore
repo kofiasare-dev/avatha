@@ -7,4 +7,5 @@ artifacts
 deployments
 
 .env
+.env.explorer
 notes.txt
